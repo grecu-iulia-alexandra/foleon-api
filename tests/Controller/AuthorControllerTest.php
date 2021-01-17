@@ -32,7 +32,7 @@ class AuthorControllerTest extends WebTestCase
         $bookFixtures->load($this->entityManager);
     }
 
-    public function testShowBook()
+    public function testShowAuthor()
     {
         $author = $this->entityManager->getRepository(Author::class)->findOneBy([]);
 
@@ -41,12 +41,38 @@ class AuthorControllerTest extends WebTestCase
         $this->assertEquals(200, $this->client->getResponse()->getStatusCode());
     }
 
-    public function testShowBookDoesNotExist()
+    public function testShowAuthorDoesNotExist()
     {
         $authorId = $this->entityManager->getRepository(Author::class)->count([]) + 1;
 
         $this->client->request('GET', '/author/' . $authorId);
 
         $this->assertEquals(404, $this->client->getResponse()->getStatusCode());
+    }
+
+    public function testPostAuthor()
+    {
+        $this->client->request(
+            'POST',
+            '/author',
+            [],
+            [],
+            [],
+            json_encode([
+                'firstName' => 'John',
+                'lastName' => 'Smith'
+            ])
+        );
+
+        $this->assertEquals(201, $this->client->getResponse()->getStatusCode());
+    }
+
+    public function testPostAuthorInvalidData() {
+        $this->client->request(
+            'POST',
+            '/author'
+        );
+
+        $this->assertEquals(422, $this->client->getResponse()->getStatusCode());
     }
 }

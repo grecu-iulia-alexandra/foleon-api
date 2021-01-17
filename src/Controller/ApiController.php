@@ -26,12 +26,21 @@ abstract class ApiController extends AbstractController
 
     public function makeResponse($result, $group, $status = 200)
     {
-        if ($result === null) {
+        $error = '';
+        if ($status === 404) {
+            $error = 'Resource doesn\'t exist';
+        }
+
+        if ($status === 422) {
+            $error = 'Unprocessable Entity';
+        }
+
+        if ($error !== '') {
             return new JsonResponse(
                 json_encode([
-                    "error" => "Resource doesn't exist"
+                    "error" => $error
                 ]),
-                404,
+                $status,
                 [],
                 'json'
             );

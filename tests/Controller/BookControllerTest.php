@@ -49,4 +49,36 @@ class BookControllerTest extends WebTestCase
 
         $this->assertEquals(404, $this->client->getResponse()->getStatusCode());
     }
+
+    public function testPostBook()
+    {
+        $this->client->request(
+            'POST',
+            '/book',
+            [],
+            [],
+            [],
+            json_encode([
+                'title' => 'Book title test',
+                'publishingYear' => 1990,
+                'authors' => [
+                    [
+                        'firstName' => 'John',
+                        'lastName' => 'Smith'
+                    ]
+                ]
+            ])
+        );
+
+        $this->assertEquals(201, $this->client->getResponse()->getStatusCode());
+    }
+
+    public function testPostBookInvalidData() {
+        $this->client->request(
+            'POST',
+            '/book'
+        );
+
+        $this->assertEquals(422, $this->client->getResponse()->getStatusCode());
+    }
 }
