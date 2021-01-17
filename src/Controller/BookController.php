@@ -4,6 +4,9 @@ namespace App\Controller;
 
 use App\Entity\Author;
 use App\Entity\Book;
+use App\Exception\FoleonApiException;
+use App\Exception\InvalidDataException;
+use App\Exception\NotFoundException;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\EntityManagerInterface;
@@ -56,7 +59,11 @@ class BookController extends ApiController
             return $this->makeResponse(null, 'book', 422);
         }
 
-        $authors = $this->getAuthors($content['authors'], $entityManager);
+        try {
+            $authors = $this->getAuthors($content['authors'], $entityManager);
+        } catch (FoleonApiException $exception) {
+            return $this->makeResponse($exception->getMessage(), '', 422);
+        }
 
         $book = new Book (
             $content['title'],
@@ -79,21 +86,30 @@ class BookController extends ApiController
         foreach ($authors as $author) {
             if (is_numeric($author)){
                 $authorEntity = $authorRepository->find($author);
-                if ($authorEntity !== null) {
-                    $result[] = $authorEntity;
+                if ($authorEntity === null) {
+                    throw new NotFoundException(
+                        sprintf(
+                            "Invalid author provided with ID: %d",
+                            $author
+                        )
+                    );
                 }
+                $result[] = $authorEntity;
             }
 
-            if (isset($author['firstName']) && $author['lastName']) {
-               $authorEntity = new Author(
-                   $author['firstName'],
-                   $author['lastName']
-               );
-
-               $entityManager->persist($authorEntity);
-
-               $result[] = $authorEntity;
+            if (! (isset($author['firstName']) && isset($author['lastName']))) {
+                throw new InvalidDataException(
+                    'Invalid data for author. Please provide a first name and last name'
+                );
             }
+            $authorEntity = new Author(
+                $author['firstName'],
+                $author['lastName']
+            );
+
+            $entityManager->persist($authorEntity);
+
+            $result[] = $authorEntity;
         }
 
         return new ArrayCollection($result);

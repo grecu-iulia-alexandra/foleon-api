@@ -63,7 +63,7 @@ abstract class ApiController extends AbstractController
         if ($error !== '') {
             return new JsonResponse(
                 json_encode([
-                    "error" => $error
+                    "error" => $result ?? $error
                 ]),
                 $status,
                 [],

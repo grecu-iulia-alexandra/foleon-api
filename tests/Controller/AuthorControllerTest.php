@@ -43,7 +43,8 @@ class AuthorControllerTest extends WebTestCase
 
     public function testShowAuthorDoesNotExist()
     {
-        $authorId = $this->entityManager->getRepository(Author::class)->count([]) + 10;
+        $latestAuthor = $this->entityManager->getRepository(Author::class)->findOneBy([], ['id' => "DESC"]);
+        $authorId = $latestAuthor->getId() + 1;
 
         $this->client->request('GET', '/author/' . $authorId);
 
