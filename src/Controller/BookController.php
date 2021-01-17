@@ -7,6 +7,7 @@ use App\Entity\Book;
 use App\Exception\FoleonApiException;
 use App\Exception\InvalidDataException;
 use App\Exception\NotFoundException;
+use App\Service\BookService;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\EntityManagerInterface;
@@ -47,11 +48,13 @@ class BookController extends ApiController
      * @Route("/book", methods={"POST"})
      * @param Request $request
      * @param EntityManagerInterface $entityManager
+     * @param BookService $bookService
      * @return JsonResponse
      */
     public function postAction(
         Request $request,
-        EntityManagerInterface $entityManager
+        EntityManagerInterface $entityManager,
+        BookService $bookService
     ) {
         $content = json_decode($request->getContent(), true);
 
@@ -60,7 +63,7 @@ class BookController extends ApiController
         }
 
         try {
-            $authors = $this->getAuthors($content['authors'], $entityManager);
+            $authors = $bookService->makeAuthorsCollection($content['authors']);
         } catch (FoleonApiException $exception) {
             return $this->makeResponse($exception->getMessage(), '', 422);
         }
@@ -77,41 +80,5 @@ class BookController extends ApiController
         $entityManager->refresh($book);
 
         return $this->makeResponse($book, 'book', 201);
-    }
-
-    private function getAuthors(array $authors, EntityManagerInterface $entityManager): Collection
-    {
-        $result = [];
-        $authorRepository = $entityManager->getRepository(Author::class);
-        foreach ($authors as $author) {
-            if (is_numeric($author)){
-                $authorEntity = $authorRepository->find($author);
-                if ($authorEntity === null) {
-                    throw new NotFoundException(
-                        sprintf(
-                            "Invalid author provided with ID: %d",
-                            $author
-                        )
-                    );
-                }
-                $result[] = $authorEntity;
-            }
-
-            if (! (isset($author['firstName']) && isset($author['lastName']))) {
-                throw new InvalidDataException(
-                    'Invalid data for author. Please provide a first name and last name'
-                );
-            }
-            $authorEntity = new Author(
-                $author['firstName'],
-                $author['lastName']
-            );
-
-            $entityManager->persist($authorEntity);
-
-            $result[] = $authorEntity;
-        }
-
-        return new ArrayCollection($result);
     }
 }
