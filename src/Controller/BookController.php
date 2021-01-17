@@ -23,7 +23,15 @@ class BookController extends ApiController
         Request $request,
         EntityManagerInterface $entityManager
     ) {
+        $cacheKey = str_replace('/', '-', $request->getRequestUri());
+        $bookCache = $this->getCache()->getItem($cacheKey);
+        if ($bookCache->isHit()) {
+            return $this->makeResponse($bookCache->get(), 'book');
+        }
+
         $book = $entityManager->getRepository(Book::class)->find($request->get('id'));
+        $bookCache->set($this->getSerializer()->serialize($book, 'json',  ['groups' => 'book']));
+        $this->getCache()->save($bookCache);
 
         if ($book) {
             return $this->makeResponse($book, 'book');

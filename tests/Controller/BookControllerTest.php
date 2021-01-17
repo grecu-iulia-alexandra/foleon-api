@@ -43,7 +43,7 @@ class BookControllerTest extends WebTestCase
 
     public function testShowBookDoesNotExist()
     {
-        $bookId = $this->entityManager->getRepository(Book::class)->count([]) + 1;
+        $bookId = $this->entityManager->getRepository(Book::class)->count([]) + 10;
 
         $this->client->request('GET', '/book/' . $bookId);
 

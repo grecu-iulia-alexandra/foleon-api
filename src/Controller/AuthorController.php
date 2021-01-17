@@ -20,7 +20,15 @@ class AuthorController extends ApiController
         Request $request,
         EntityManagerInterface $entityManager
     ) {
+        $cacheKey = str_replace('/', '-', $request->getRequestUri());
+        $authorCache = $this->getCache()->getItem($cacheKey);
+        if ($authorCache->isHit()) {
+            return $this->makeResponse($authorCache->get(), 'author');
+        }
+
         $author = $entityManager->getRepository(Author::class)->find($request->get('id'));
+        $authorCache->set($this->getSerializer()->serialize($author, 'json',  ['groups' => 'author']));
+        $this->getCache()->save($authorCache);
 
         if ($author) {
             return $this->makeResponse($author, 'author');
