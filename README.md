@@ -15,16 +15,16 @@
     - PHP 7.4
     - MySql
 To start the application use the following steps:
-1. Run command: `git clone git@github.com:grecu-iulia-alexandra/foleon-api.git`
-2. Update `.env`, `.env.test` files, specifically the `DATABASE_URL` variables
+1. Run command: `git clone git@github.com:grecu-iulia-alexandra/foleon-api.git foleon-api`
+2. Update `.env`, `.env.test` files based on the example files, specifically the `DATABASE_URL` variables
 3. Run `composer install`
 4. Create dev and test databases:
-- `bin/console doctrine:database:create`
-- `bin/console doctrine:database:create --env=test`
+    - `bin/console doctrine:database:create`
+    - `bin/console doctrine:database:create --env=test`
 5. Add relevant tables and data:
-- `bin/console doctrine:migrations:migrate`
-- `bin/console doctrine:migrations:migrate --env=test`
-- `bin/console doctrine:fixtures:load`
+    - `bin/console doctrine:migrations:migrate`
+    - `bin/console doctrine:migrations:migrate --env=test`
+    - `bin/console doctrine:fixtures:load`
 6. Start server with `symfony server:start`
 
 ## API REQUEST EXAMPLES
